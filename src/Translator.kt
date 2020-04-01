@@ -4,7 +4,7 @@ enum class State {
 class Traslator {
 
     var prevState = 0
-    var matrix = arrayOf<Array<Int>>(arrayOf(1, -1, -1, -1, -1, -1),
+    var matrix = arrayOf<Array<Int>>(arrayOf(1, -1, -1, -1, -1),
                                      arrayOf(-1, 2, 3, 4, -1),
                                      arrayOf(-1, -1, -1, -1, 5),
                                      arrayOf(-1, -1, 3, 4, -1),
@@ -45,7 +45,7 @@ class Traslator {
 
             curState =  matrix[prevState][curState]
             prevState = curState
-
+            var govno = String()
             when(curState) {
                 -1 -> {
                     mongodb = "error"
@@ -54,19 +54,33 @@ class Traslator {
                 1 -> {
                     command = "find"
                 }
+                3 -> {
+                    columns.add(word.dropLast(2))
+                    govno = word.substring(0, word.length - 1)
+                    println(word)
+                }
+                4 -> {
+                    columns.add(word)
+                }
                 6 -> {
                     tbName = word
                 }
             }
-            for (col in columns) {
-                cols += "$col : 1, "
-            }
-            if (cols.isNotEmpty()) {
-                cols = " ,$cols"
-                cols.drop(cols.length - 1)
-            }
+
+            //columns.clear()
+
         }
-        mongodb = "db.$tbName.$command({}$cols)"
+        for (col in columns) {
+            cols += "$col : 1, "
+        }
+        if (cols.isNotEmpty()) {
+            cols = ", $cols"
+            cols.dropLast(1)
+        }
+
+        cols.dropLast(cols.length - 1)
+        var t = cols.subSequence(0, cols.length - 2)
+        mongodb = "db.$tbName.$command({}$t)"
         return mongodb
     }
 }

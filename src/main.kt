@@ -4,9 +4,10 @@ fun main(args : Array<String>) {
         println("error")
     }
     val translator : Traslator = Traslator()
-    val mongodbcommand = translator.translate(args)
-    for (word in mongodbcommand) {
-        print("$word ")
+    for (a in args) {
+        println(a)
     }
+    val mongodbcommand = translator.translate(args)
+    print(mongodbcommand)
 }
 
