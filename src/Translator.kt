@@ -77,9 +77,13 @@ class Traslator {
             cols = ", $cols"
             cols.dropLast(1)
         }
+        var t = ""
+        if (cols.isNotEmpty()) {
+            cols.dropLast(cols.length - 1)
+            t = (cols.subSequence(0, cols.length - 2)).toString()
+        }
 
-        cols.dropLast(cols.length - 1)
-        var t = cols.subSequence(0, cols.length - 2)
+
         mongodb = "db.$tbName.$command({}$t)"
         return mongodb
     }
