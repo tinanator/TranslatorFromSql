@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.Assertions.*
 
 fun main(args : Array<String>) {
     if (args.isEmpty()) {

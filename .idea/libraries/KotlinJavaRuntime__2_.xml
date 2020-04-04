@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="KotlinJavaRuntime">
+  <library name="KotlinJavaRuntime (2)">
     <CLASSES>
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib.jar!/" />
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-reflect.jar!/" />
@@ -17,7 +17,6 @@
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test-sources.jar!/" />
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk7-sources.jar!/" />
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk8-sources.jar!/" />
-      <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test-js-sources.jar!/" />
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test-junit-sources.jar!/" />
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test-junit5-sources.jar!/" />
       <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test-testng-sources.jar!/" />

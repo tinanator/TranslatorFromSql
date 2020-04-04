@@ -82,8 +82,6 @@ class Traslator {
             if (isError) {
                 return "ERROR"
             }
-
-
         }
         for (col in columns) {
             cols += "$col : 1, "
@@ -96,6 +94,9 @@ class Traslator {
         if (cols.isNotEmpty()) {
             cols.dropLast(cols.length - 1)
             t = (cols.subSequence(0, cols.length - 2)).toString()
+        }
+        if (tbName.isEmpty()) {
+            return "ERROR"
         }
         mongodb = "db.$tbName.$command({}$t)"
         return mongodb
