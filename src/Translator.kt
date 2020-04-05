@@ -41,32 +41,16 @@ class Traslator {
             State.INT
         } else if(isPredicate(word)){
             State.PREDICAT
-        }else {
+        } else {
             when (word) {
-                "SELECT" -> {
-                    State.SELECT
-                }
-                "*" -> {
-                    State.ALL
-                }
-                "FROM" -> {
-                    State.FROM
-                }
-                "LIMIT" -> {
-                    State.LIMIT
-                }
-                "OFFSET" -> {
-                    State.OFFSET
-                }
-                "WHERE" -> {
-                    State.WHERE
-                }
-                "AND" -> {
-                    State.AND
-                }
-                else -> {
-                    State.NAME
-                }
+                "SELECT" -> { State.SELECT }
+                "*" -> { State.ALL }
+                "FROM" -> { State.FROM }
+                "LIMIT" -> { State.LIMIT }
+                "OFFSET" -> { State.OFFSET }
+                "WHERE" -> { State.WHERE }
+                "AND" -> { State.AND }
+                else -> { State.NAME }
             }
         }
         return lexem
@@ -116,7 +100,6 @@ class Traslator {
     }
 
     private fun findLimit(lexem : State, word : String) : State2 {
-
         if (lexem == State.LIMIT) {
             if (limit <= 0) {
                 prevState = State.LIMIT
@@ -151,18 +134,10 @@ class Traslator {
     }
 
     private fun getPredicatSymbol(pred : String) : String {
-        if (pred == ">") {
-            return "gt"
-        }
-        else if (pred == "<") {
-            return "lt"
-        }
-        else if (pred == "=") {
-            return "eq"
-        }
-        else {
-            return "ne"
-        }
+        if (pred == ">") { return "gt" }
+        else if (pred == "<") { return "lt" }
+        else if (pred == "=") { return "eq" }
+        else { return "ne" }
     }
 
     private fun findWhere(lexem : State, word : String) : State2 {
@@ -171,19 +146,14 @@ class Traslator {
             return State2.FIND_WHERE
         }
         else if (lexem == State.NAME || lexem == State.INT) {
+            prevState = State.NAME
             if (prevState == State.WHERE) {
                 query += "$word: "
-                prevState = State.NAME
                 return State2.FIND_WHERE
             }
             else if (prevState == State.PREDICAT) {
-                prevState = State.NAME
-                if (isDigit(word)) {
-                    query += "$word}"
-                }
-                else {
-                    query += "\"$word\"}"
-                }
+                query += if (isDigit(word)) { "$word}" }
+                else { "\"$word\"}" }
                 return State2.FIND_NEXT_WHERE
             }
             return State2.ERROR
@@ -238,9 +208,19 @@ class Traslator {
                     state2 = findWhere(lexem, word)
                 }
                 State2.FIND_NEXT_WHERE -> {
-                    query += ", "
-                    prevState = State.WHERE
-                    state2 = State2.FIND_WHERE
+                    if (lexem == State.AND) {
+                        query += ", "
+                        prevState = State.WHERE
+                        state2 = State2.FIND_WHERE
+                    }
+                    else if (lexem == State.LIMIT) {
+                        state2 = State2.FIND_LIMIT
+                        findLimit(lexem, word)
+                    }
+                    else {
+                        state2 = State2.ERROR
+                    }
+
                 }
                 else -> {
                     state2 = State2.ERROR
