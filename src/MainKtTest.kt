@@ -10,7 +10,11 @@ internal class MainKtTest {
         sql = arrayOf("SELECT", "COL1,", "COL2,", "COL3", "FROM", "TABLE")
         assert(t.translate(sql) == "db.TABLE.find({}, COL1: 1, COL2: 1, COL3: 1)")
     }
-
+    @org.junit.jupiter.api.Test
+    fun limitTest() {
+        var sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5")
+        assert(t.translate(sql) == "db.TABLE.find({}).limit(5)")
+    }
     @org.junit.jupiter.api.Test
     fun errorTest(){
         var sql : Array<String> = arrayOf("SELECT", "FROM", "TABLE")
