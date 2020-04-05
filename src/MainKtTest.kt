@@ -26,6 +26,16 @@ internal class MainKtTest {
     }
 
     @org.junit.jupiter.api.Test
+    fun predicatTest() {
+        var sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", ">", "4")
+        println("db.TABLE.find({col: {\$gt: 4}})")
+        assert(t.translate(sql) == "db.TABLE.find({col: {\$gt: 4}})")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "=", "value")
+        assert(t.translate(sql) == "db.TABLE.find({col: {\$eq: \"value\"}})")
+    }
+
+    @org.junit.jupiter.api.Test
     fun offsetTest() {
         var sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5", "OFFSET", "2")
         assert(t.translate(sql) == "db.TABLE.find({}).limit(5).offset(2)")

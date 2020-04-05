@@ -1,11 +1,11 @@
 import java.text.ParseException
 
 enum class State {
-    SELECT, ALL, NAME, FROM, NAME_COMMA, NONE, LIMIT, INT, OFFSET
+    SELECT, ALL, NAME, FROM, NAME_COMMA, NONE, LIMIT, INT, OFFSET, WHERE, PREDICAT, AND
 }
 
 enum class State2 {
-    FIND_COMMAND, FIND_COLS, FIND_TABLENAME, FIND_LIMIT, ERROR, FIND_FUNCTIONS, FIND_OFFSET
+    FIND_COMMAND, FIND_COLS, FIND_TABLENAME, FIND_LIMIT, ERROR, FIND_OFFSET, FIND_WHERE, FIND_NEXT_WHERE
 }
 
 
@@ -18,8 +18,9 @@ class Traslator {
     private var tbName = String()
     private var isError = false
     private val columns: MutableList<String> = mutableListOf()
+    private var query : String = ""
 
-    private fun isDigit(word : String) : Boolean {
+        private fun isDigit(word : String) : Boolean {
         try {
             word.toInt()
         }
@@ -29,13 +30,18 @@ class Traslator {
         return true
     }
 
+    private fun isPredicate(word : String) : Boolean {
+        return word == ">" || word == "<" || word == "=" || word == "<>"
+    }
 
     private fun defineLexem(word: String): State {
         val lexem = if (word[word.length - 1] == ',') {
             State.NAME_COMMA
         } else if (isDigit(word)) {
             State.INT
-        } else {
+        } else if(isPredicate(word)){
+            State.PREDICAT
+        }else {
             when (word) {
                 "SELECT" -> {
                     State.SELECT
@@ -51,6 +57,12 @@ class Traslator {
                 }
                 "OFFSET" -> {
                     State.OFFSET
+                }
+                "WHERE" -> {
+                    State.WHERE
+                }
+                "AND" -> {
+                    State.AND
                 }
                 else -> {
                     State.NAME
@@ -98,7 +110,7 @@ class Traslator {
         }
         else if (lexem == State.NAME && prevState == State.FROM) {
             tbName = word
-            return State2.FIND_LIMIT
+            return State2.FIND_WHERE
         }
         return State2.ERROR
     }
@@ -138,6 +150,55 @@ class Traslator {
         return State2.ERROR
     }
 
+    private fun getPredicatSymbol(pred : String) : String {
+        if (pred == ">") {
+            return "gt"
+        }
+        else if (pred == "<") {
+            return "lt"
+        }
+        else if (pred == "=") {
+            return "eq"
+        }
+        else {
+            return "ne"
+        }
+    }
+
+    private fun findWhere(lexem : State, word : String) : State2 {
+        if (lexem == State.WHERE) {
+            prevState = State.WHERE
+            return State2.FIND_WHERE
+        }
+        else if (lexem == State.NAME || lexem == State.INT) {
+            if (prevState == State.WHERE) {
+
+                query += "$word: "
+                prevState = State.NAME
+                return State2.FIND_WHERE
+
+            }
+            else if (prevState == State.PREDICAT) {
+                if (isDigit(word)) {
+                    query += "$word}"
+                }
+                else {
+                    query += "\"$word\"}"
+                }
+                return State2.FIND_NEXT_WHERE
+            }
+            return State2.ERROR
+        }
+        else if (lexem == State.PREDICAT) {
+            if (prevState == State.NAME) {
+                query += "{$" + getPredicatSymbol(word) + ": "
+                prevState = State.PREDICAT
+                return State2.FIND_WHERE
+            }
+            return State2.ERROR
+        }
+        return findLimit(lexem, word)
+    }
 
     fun translate(sqlCommand: Array<String>): String {
         var state2 = State2.FIND_COMMAND
@@ -146,7 +207,7 @@ class Traslator {
         var cols = String()
         var curState = 0
        // var prevState = 0
-
+        query = ""
         var wasFrom = false
         var wasLimit = false
         var lexem: State = State.NONE
@@ -173,6 +234,12 @@ class Traslator {
                         state2 = State2.ERROR
                     }
                     state2 = findOffset(lexem, word)
+                }
+                State2.FIND_WHERE -> {
+                    state2 = findWhere(lexem, word)
+                }
+                State2.FIND_NEXT_WHERE -> {
+
                 }
                 else -> {
                     state2 = State2.ERROR
@@ -203,7 +270,7 @@ class Traslator {
         if (offset >= 0) {
             functions += ".offset($offset)"
         }
-        mongodb = "db.$tbName.$command({}$projection)$functions"
+        mongodb = "db.$tbName.$command({$query}$projection)$functions"
         return mongodb
     }
 }
