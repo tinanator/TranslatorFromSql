@@ -33,6 +33,24 @@ internal class MainKtTest {
 
         sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "=", "value")
         assert(t.translate(sql) == "db.TABLE.find({col: {\$eq: \"value\"}})")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "=", "value", "AND", "col2", "<>", "value3")
+        assert(t.translate(sql) == "db.TABLE.find({col: {\$eq: \"value\"}, col2: {\$ne: \"value3\"}})")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE")
+        assert(t.translate(sql) == "ERROR")
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col")
+        assert(t.translate(sql) == "ERROR")
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "=")
+        assert(t.translate(sql) == "ERROR")
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "=", "<>")
+        assert(t.translate(sql) == "ERROR")
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "<>")
+        assert(t.translate(sql) == "ERROR")
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "col2")
+        assert(t.translate(sql) == "ERROR")
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "WHERE", "col", "=", "value", "AND")
+        assert(t.translate(sql) == "ERROR")
     }
 
     @org.junit.jupiter.api.Test

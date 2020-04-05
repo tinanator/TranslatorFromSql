@@ -172,13 +172,12 @@ class Traslator {
         }
         else if (lexem == State.NAME || lexem == State.INT) {
             if (prevState == State.WHERE) {
-
                 query += "$word: "
                 prevState = State.NAME
                 return State2.FIND_WHERE
-
             }
             else if (prevState == State.PREDICAT) {
+                prevState = State.NAME
                 if (isDigit(word)) {
                     query += "$word}"
                 }
@@ -239,7 +238,9 @@ class Traslator {
                     state2 = findWhere(lexem, word)
                 }
                 State2.FIND_NEXT_WHERE -> {
-
+                    query += ", "
+                    prevState = State.WHERE
+                    state2 = State2.FIND_WHERE
                 }
                 else -> {
                     state2 = State2.ERROR
@@ -250,6 +251,15 @@ class Traslator {
             }
         }
         if (state2 == State2.ERROR) {
+            return "ERROR"
+        }
+        if (query.isNotEmpty() && query[query.length - 2] == ',' ) {
+            return "ERROR"
+        }
+        if (state2 == State2.FIND_WHERE &&  prevState == State.NAME || prevState == State.PREDICAT) {
+            return "ERROR"
+        }
+        if (prevState == State.WHERE) {
             return "ERROR"
         }
         if (tbName.isEmpty()) {return "ERROR"}
