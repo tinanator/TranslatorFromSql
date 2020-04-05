@@ -90,4 +90,9 @@ internal class MainKtTest {
         sql = arrayOf("SELECT", "col1,", "col2", "FRM")
         assert(t.translate(sql) == "ERROR")
     }
+    @org.junit.jupiter.api.Test
+    fun tests() {
+        var sql = arrayOf("SELECT", "col,", "loc,", "aaA", "FROM", "TABLE","WHERE", "col", ">", "3", "AND", "loc", "<>", "2", "LIMIT", "5", "OFFSET", "3")
+        assert(t.translate(sql) == "db.TABLE.find({col: {\$gt: 3}, loc: {\$ne: 2}}, col: 1, loc: 1, aaA: 1).limit(5).offset(3)")
+    }
 }
