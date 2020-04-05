@@ -1,11 +1,11 @@
 import java.text.ParseException
 
 enum class State {
-    SELECT, ALL, NAME, FROM, NAME_COMMA, NONE, LIMIT, INT
+    SELECT, ALL, NAME, FROM, NAME_COMMA, NONE, LIMIT, INT, OFFSET
 }
 
 enum class State2 {
-    FIND_COMMAND, FIND_COLS, FIND_TABLENAME, FIND_LIMIT, ERROR, FIND_FUNCTIONS
+    FIND_COMMAND, FIND_COLS, FIND_TABLENAME, FIND_LIMIT, ERROR, FIND_FUNCTIONS, FIND_OFFSET
 }
 
 
@@ -48,6 +48,9 @@ class Traslator {
                 }
                 "LIMIT" -> {
                     State.LIMIT
+                }
+                "OFFSET" -> {
+                    State.OFFSET
                 }
                 else -> {
                     State.NAME
@@ -95,38 +98,46 @@ class Traslator {
         }
         else if (lexem == State.NAME && prevState == State.FROM) {
             tbName = word
-            return State2.FIND_FUNCTIONS
+            return State2.FIND_LIMIT
         }
         return State2.ERROR
     }
 
     private fun findLimit(lexem : State, word : String) : State2 {
 
-            if (lexem == State.LIMIT) {
-                if (limit <= 0) {
-                    prevState = State.LIMIT
-                    return State2.FIND_LIMIT
-                }
-                return State2.ERROR
-            }
-            else if (lexem == State.INT) {
-                if (prevState == State.LIMIT) {
-                    limit = word.toInt()
-                    return State2.FIND_FUNCTIONS
-                }
+        if (lexem == State.LIMIT) {
+            if (limit <= 0) {
+                prevState = State.LIMIT
+                return State2.FIND_LIMIT
             }
             return State2.ERROR
         }
-
-    private fun findFunctions(lexem : State, word : String) : State2 {
-        if (tbName.isEmpty()) {
-            return State2.ERROR
-        }
-        if (lexem == State.LIMIT && limit < 0) {
-            return findLimit(lexem, word)
+        else if (lexem == State.INT) {
+            if (prevState == State.LIMIT) {
+                limit = word.toInt()
+                return State2.FIND_OFFSET
+            }
         }
         return State2.ERROR
     }
+
+    private fun findOffset(lexem : State, word : String) : State2{
+        if (lexem == State.OFFSET) {
+            if (offset <= 0) {
+                prevState = State.OFFSET
+                return State2.FIND_OFFSET
+            }
+            return State2.ERROR
+        }
+        else if (lexem == State.INT) {
+            if (prevState == State.OFFSET) {
+                offset = word.toInt()
+                return State2.FIND_LIMIT
+            }
+        }
+        return State2.ERROR
+    }
+
 
     fun translate(sqlCommand: Array<String>): String {
         var state2 = State2.FIND_COMMAND
@@ -151,14 +162,17 @@ class Traslator {
                 State2.FIND_TABLENAME -> {
                     state2 = findFindTableName(lexem, word)
                 }
-                State2.FIND_FUNCTIONS -> {
-                    state2 = findFunctions(lexem, word)
-                }
                 State2.FIND_LIMIT -> {
                     if (tbName.isEmpty()) {
                         state2 = State2.ERROR
                     }
-                    state2 =findLimit(lexem, word)
+                    state2 = findLimit(lexem, word)
+                }
+                State2.FIND_OFFSET -> {
+                    if (tbName.isEmpty()) {
+                        state2 = State2.ERROR
+                    }
+                    state2 = findOffset(lexem, word)
                 }
                 else -> {
                     state2 = State2.ERROR
@@ -185,6 +199,9 @@ class Traslator {
         var functions = ""
         if (limit >= 0) {
             functions += ".limit($limit)"
+        }
+        if (offset >= 0) {
+            functions += ".offset($offset)"
         }
         mongodb = "db.$tbName.$command({}$projection)$functions"
         return mongodb

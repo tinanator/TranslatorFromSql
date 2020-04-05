@@ -14,6 +14,33 @@ internal class MainKtTest {
     fun limitTest() {
         var sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5")
         assert(t.translate(sql) == "db.TABLE.find({}).limit(5)")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5", "LIMIT")
+        assert(t.translate(sql) == "ERROR")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT")
+        assert(t.translate(sql) == "ERROR")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "-7")
+        assert(t.translate(sql) == "ERROR")
+    }
+
+    @org.junit.jupiter.api.Test
+    fun offsetTest() {
+        var sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5", "OFFSET", "2")
+        assert(t.translate(sql) == "db.TABLE.find({}).limit(5).offset(2)")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5", "OFFSET")
+        assert(t.translate(sql) == "ERROR")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "OFFSET", "2")
+        assert(t.translate(sql) == "ERROR")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "7", "OFFSET", "-6")
+        assert(t.translate(sql) == "ERROR")
+
+        sql = arrayOf("SELECT", "*", "FROM", "TABLE", "LIMIT", "5", "OFFSET", "1", "OFFSET", "8")
+        assert(t.translate(sql) == "ERROR")
     }
     @org.junit.jupiter.api.Test
     fun errorTest(){
