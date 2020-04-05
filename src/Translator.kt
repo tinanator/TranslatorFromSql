@@ -43,30 +43,14 @@ class Traslator {
             State.PREDICAT
         }else {
             when (word) {
-                "SELECT" -> {
-                    State.SELECT
-                }
-                "*" -> {
-                    State.ALL
-                }
-                "FROM" -> {
-                    State.FROM
-                }
-                "LIMIT" -> {
-                    State.LIMIT
-                }
-                "OFFSET" -> {
-                    State.OFFSET
-                }
-                "WHERE" -> {
-                    State.WHERE
-                }
-                "AND" -> {
-                    State.AND
-                }
-                else -> {
-                    State.NAME
-                }
+                "SELECT" -> { State.SELECT }
+                "*" -> { State.ALL }
+                "FROM" -> { State.FROM }
+                "LIMIT" -> { State.LIMIT }
+                "OFFSET" -> { State.OFFSET }
+                "WHERE" -> { State.WHERE }
+                "AND" -> { State.AND }
+                else -> { State.NAME }
             }
         }
         return lexem
@@ -151,18 +135,10 @@ class Traslator {
     }
 
     private fun getPredicatSymbol(pred : String) : String {
-        if (pred == ">") {
-            return "gt"
-        }
-        else if (pred == "<") {
-            return "lt"
-        }
-        else if (pred == "=") {
-            return "eq"
-        }
-        else {
-            return "ne"
-        }
+        if (pred == ">") { return "gt" }
+        else if (pred == "<") { return "lt" }
+        else if (pred == "=") { return "eq" }
+        else { return "ne" }
     }
 
     private fun findWhere(lexem : State, word : String) : Process {
