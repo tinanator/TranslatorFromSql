@@ -5,7 +5,7 @@ enum class State {
 
 class Traslator {
     private var mongodb : String = String()
-    private var prevState = 0
+
     private var command = String()
     private var tbName = String()
     private var isError = false
@@ -71,6 +71,7 @@ class Traslator {
         val tmp : String = String()
         var cols = String()
         var curState = 0
+        var prevState = 0
         var lexem : State = State.NONE
         for (word in sqlCommand) {
             lexem = defineLexem(word)
